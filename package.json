@@ -1,0 +1,16 @@
+{
+  "name": "queues",
+  "version": "1.0.0",
+  "description": "",
+  "main": "queue.js",
+  "scripts": {
+    "test": "mocha test"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "double-ended-queue": "^2.1.0-0",
+    "mocha": "^2.4.5"
+  }
+}
