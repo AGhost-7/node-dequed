@@ -34,3 +34,6 @@ suite completed
 The `double-ended-queue` module seems to be using a circular buffer. I think
 I can push the performance a bit further by using object pooling, but I want
 to make that optional without affecting the performance too much.
+
+Somehow having an object pool in place seems to hurt my performance more than
+anything...

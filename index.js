@@ -3,14 +3,14 @@
  */
 
 var Node = require('./lib/node');
-var recycler = require('./lib/recycler');
 var Iterator = require('./lib/iterator');
+var ArrayObjectPool = require('./lib/array-object-pool');
 
 function Deque() {
 	this.start = null;
 	this.end = null;
 	this.recycle = false;
-	this.objectPool = null;
+	this.pool = null;
 }
 
 /**
@@ -26,11 +26,26 @@ if(typeof Symbol !== 'undefined') {
 
 Deque.prototype.poolObjects = function(pool) {
 	this.recycle = true;
-	if(typeof pool === 'object') {
-		this.objectPool = pool;
+	this.pool = pool
+};
+
+/**
+ * Enqueue using the internal object pool.
+ */
+Deque.prototype._enqueuePooled = function(element) {
+	var node = this.pool.node(element);
+	if(this.start === null) {
+		this.start = node;
+		this.end = node;
+		// make sure to empty out the pooled object
+		node.next = null;
+		node.previous = null;
 	} else {
-		// Otherwise default to the global pool.
-		this.objectPool = recycler('global');
+		var orig = this.start;
+		orig.previous = node;
+		node.next = orig;
+		node.previous = null;
+		this.start = node;
 	}
 };
 
@@ -40,6 +55,11 @@ Deque.prototype.poolObjects = function(pool) {
  * Complexity: O(1)
  */
 Deque.prototype.enqueue = function(element) {
+	if(this.recycle) {
+		this._enqueuePooled(element);
+		return;
+	}
+		
 	var node = new Node(element);
 	if(this.start === null) {
 		this.start = node;
@@ -51,6 +71,7 @@ Deque.prototype.enqueue = function(element) {
 		this.start = node;
 	}
 };
+
 
 /**
  * Remove item at the end of the deque.
@@ -64,12 +85,18 @@ Deque.prototype.dequeue = function() {
 	} else {
 		var newEnd = end.previous;
 		if(newEnd === null) {
+			if(this.recycle) {
+				this.pool.store(this.start);
+			}
 			this.start = null;	
 			this.end = null;
 			return undefined;
 		}
-
+		
 		newEnd.next = null;
+		if(this.recycle) {
+			this.pool.store(this.end);
+		}
 		this.end = newEnd;
 		return end.element;
 	}
@@ -160,6 +187,8 @@ Deque.fromArray = function(arr) {
 	}
 	return q;
 };
+
+Deque.ArrayObjectPool = ArrayObjectPool;
 
 module.exports = Deque;
 
