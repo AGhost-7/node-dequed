@@ -20,7 +20,6 @@ Deque.prototype.enqueue = function(element) {
 		this.start = node;
 		this.end = node;
 	} else {
-		// a bit complicated, but still constant time
 		var orig = this.start;
 		orig.previous = node;
 		node.next = orig;
