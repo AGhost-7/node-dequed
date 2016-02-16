@@ -3,11 +3,36 @@
  */
 
 var Node = require('./lib/node');
+var recycler = require('./lib/recycler');
+var Iterator = require('./lib/iterator');
 
 function Deque() {
 	this.start = null;
 	this.end = null;
+	this.recycle = false;
+	this.objectPool = null;
 }
+
+/**
+ * Returns an iterator for ES6 for loops...
+ */
+Deque.prototype.iterator = function() {
+	return new Iterator(this.start);
+};
+
+if(typeof Symbol !== 'undefined') {
+	Deque.prototype[Symbol.iterator] = Deque.prototype.iterator;
+}
+
+Deque.prototype.poolObjects = function(pool) {
+	this.recycle = true;
+	if(typeof pool === 'object') {
+		this.objectPool = pool;
+	} else {
+		// Otherwise default to the global pool.
+		this.objectPool = recycler('global');
+	}
+};
 
 /**
  * Add item at the start of the deque.
