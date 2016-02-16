@@ -1,6 +1,7 @@
 var runBenchmarks = require('../run-benchmarks');
 runBenchmarks('add-remove', [
-	'my-deque',
+	'dequed',
+	'dequed-pooled',
 	'double-ended-queue',
 	'dequeue',
 	'deque'
